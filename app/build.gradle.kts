@@ -28,7 +28,15 @@ android {
     }
     kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true }
-    testOptions { unitTests.isIncludeAndroidResources = true }
+    testOptions {
+        unitTests.isIncludeAndroidResources = true
+        // Conscrypt'in yerel kütüphane adını (linux/x86_64) Türkçe locale'in
+        // i->ı dönüşümüyle bozmasını önlemek için test JVM'ini İngilizce locale ile çalıştır.
+        unitTests.all {
+            it.systemProperty("user.language", "en")
+            it.systemProperty("user.country", "US")
+        }
+    }
 }
 
 dependencies {
