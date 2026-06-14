@@ -29,6 +29,7 @@ import com.abis.direnc.ui.theme.Spacing
 fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
     val texts by viewModel.texts.collectAsStateWithLifecycle()
     var draft by remember { mutableStateOf("") }
+    var editingId by remember { mutableStateOf<Long?>(null) }
 
     Column(
         modifier = Modifier
@@ -58,13 +59,32 @@ fun SettingsScreen(viewModel: SettingsViewModel, onBack: () -> Unit) {
             verticalArrangement = Arrangement.spacedBy(Spacing.sm),
         ) {
             items(texts, key = { it.id }) { item ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Text(item.text, modifier = Modifier.weight(1f))
-                    TextButton(onClick = { viewModel.delete(item) }) { Text("Sil") }
+                if (editingId == item.id) {
+                    var edited by remember(item.id) { mutableStateOf(item.text) }
+                    Column(modifier = Modifier.fillMaxWidth()) {
+                        OutlinedTextField(
+                            value = edited,
+                            onValueChange = { edited = it },
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        Row(horizontalArrangement = Arrangement.End, modifier = Modifier.fillMaxWidth()) {
+                            TextButton(onClick = { editingId = null }) { Text("İptal") }
+                            TextButton(
+                                onClick = { viewModel.edit(item, edited); editingId = null },
+                                enabled = edited.isNotBlank(),
+                            ) { Text("Kaydet") }
+                        }
+                    }
+                } else {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(item.text, modifier = Modifier.weight(1f))
+                        TextButton(onClick = { editingId = item.id }) { Text("Düzenle") }
+                        TextButton(onClick = { viewModel.delete(item) }) { Text("Sil") }
+                    }
                 }
             }
         }

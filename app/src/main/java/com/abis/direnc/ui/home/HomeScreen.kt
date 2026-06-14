@@ -47,6 +47,8 @@ fun HomeScreen(
             // Plan 1'de ritüel uygulama içi butonla tetiklenir (Plan 2'de otomatik olacak)
             Button(onClick = onStartRitual) { Text("Telefonu açmak istiyorum") }
             Spacer(Modifier.height(Spacing.md))
+            // Plan 1'de oturum doğrudan bitirilebilir. Plan 2'de (gözcü) bitirme
+            // ritüelin arkasına alınacak; böylece "kaçış kapısı" olmayacak (spec §3.5).
             OutlinedButton(onClick = { viewModel.endSession() }) { Text("Oturumu bitir") }
         } else {
             Text("Bugün ${state.todayResistance} kez direndin · Seri: ${state.streak} gün",

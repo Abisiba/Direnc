@@ -107,6 +107,7 @@ class MainActivity : ComponentActivity() {
     private fun repoAsSettingsSource() = object : SettingsSource {
         override fun motivationTexts(): Flow<List<MotivationText>> = repo.motivationTexts()
         override suspend fun addMotivation(text: String) = repo.addMotivation(text)
+        override suspend fun updateMotivation(text: MotivationText) = repo.updateMotivation(text)
         override suspend fun deleteMotivation(text: MotivationText) = repo.deleteMotivation(text)
     }
 }
