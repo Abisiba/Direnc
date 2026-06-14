@@ -22,7 +22,10 @@ import com.abis.direnc.ui.theme.Spacing
 @Composable
 fun HomeScreen(
     viewModel: HomeViewModel,
+    permissionsReady: Boolean,
     onStartRitual: () -> Unit,
+    onStartSessionGuarded: () -> Unit,
+    onOpenOnboarding: () -> Unit,
     onOpenStats: () -> Unit,
     onOpenSettings: () -> Unit,
 ) {
@@ -54,7 +57,9 @@ fun HomeScreen(
             Text("Bugün ${state.todayResistance} kez direndin · Seri: ${state.streak} gün",
                 textAlign = TextAlign.Center)
             Spacer(Modifier.height(Spacing.lg))
-            Button(onClick = { viewModel.startSession() }) { Text("Çalışmaya başla") }
+            Button(onClick = {
+                if (permissionsReady) onStartSessionGuarded() else onOpenOnboarding()
+            }) { Text("Çalışmaya başla") }
         }
 
         Spacer(Modifier.height(Spacing.xxl))

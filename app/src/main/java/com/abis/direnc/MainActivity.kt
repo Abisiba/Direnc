@@ -7,6 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -17,6 +25,7 @@ import com.abis.direnc.data.Session
 import com.abis.direnc.ui.home.HomeScreen
 import com.abis.direnc.ui.home.HomeSource
 import com.abis.direnc.ui.home.HomeViewModel
+import com.abis.direnc.ui.onboarding.OnboardingScreen
 import com.abis.direnc.ui.ritual.RitualActions
 import com.abis.direnc.ui.ritual.RitualScreen
 import com.abis.direnc.ui.ritual.RitualViewModel
@@ -27,6 +36,8 @@ import com.abis.direnc.ui.stats.StatsScreen
 import com.abis.direnc.ui.stats.StatsSource
 import com.abis.direnc.ui.stats.StatsViewModel
 import com.abis.direnc.ui.theme.DirencTheme
+import com.abis.direnc.watcher.Permissions
+import com.abis.direnc.watcher.WatcherService
 import kotlinx.coroutines.flow.Flow
 import java.time.ZoneId
 
@@ -50,11 +61,46 @@ class MainActivity : ComponentActivity() {
                             val vm = viewModel<HomeViewModel> {
                                 HomeViewModel(repoAsHomeSource(), zone, now)
                             }
+                            // İzin durumunu ekran her öne geldiğinde tazele
+                            var ready by remember { mutableStateOf(Permissions.allGranted(this@MainActivity)) }
+                            LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+                                ready = Permissions.allGranted(this@MainActivity)
+                            }
+                            val homeState by vm.state.collectAsStateWithLifecycle()
+                            LaunchedEffect(homeState.sessionActive) {
+                                if (!homeState.sessionActive) WatcherService.stop(this@MainActivity)
+                            }
                             HomeScreen(
                                 viewModel = vm,
+                                permissionsReady = ready,
                                 onStartRitual = { navController.navigate("ritual") },
+                                onStartSessionGuarded = {
+                                    vm.startSession()
+                                    WatcherService.start(this@MainActivity)
+                                },
+                                onOpenOnboarding = { navController.navigate("onboarding") },
                                 onOpenStats = { navController.navigate("stats") },
                                 onOpenSettings = { navController.navigate("settings") },
+                            )
+                        }
+                        composable("onboarding") {
+                            var overlay by remember { mutableStateOf(Permissions.canDrawOverlay(this@MainActivity)) }
+                            var acc by remember { mutableStateOf(Permissions.isAccessibilityEnabled(this@MainActivity)) }
+                            var batt by remember { mutableStateOf(Permissions.isBatteryUnrestricted(this@MainActivity)) }
+                            LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+                                overlay = Permissions.canDrawOverlay(this@MainActivity)
+                                acc = Permissions.isAccessibilityEnabled(this@MainActivity)
+                                batt = Permissions.isBatteryUnrestricted(this@MainActivity)
+                            }
+                            OnboardingScreen(
+                                overlayGranted = overlay,
+                                accessibilityGranted = acc,
+                                batteryGranted = batt,
+                                onOpenOverlay = { Permissions.openOverlaySettings(this@MainActivity) },
+                                onOpenAccessibility = { Permissions.openAccessibilitySettings(this@MainActivity) },
+                                onOpenBattery = { Permissions.openBatterySettings(this@MainActivity) },
+                                onAllReady = { navController.popBackStack() },
+                                onBack = { navController.popBackStack() },
                             )
                         }
                         composable("ritual") {
