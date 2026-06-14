@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">Direnç</string>
+    <style name="Theme.Direnc" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
