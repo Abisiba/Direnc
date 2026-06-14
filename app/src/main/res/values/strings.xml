@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Direnç</string>
+    <string name="accessibility_desc">Çalışma oturumu açıkken ritüel ekranından kaçmayı engeller ve "Vazgeçtim" dediğinde telefonu kilitler. Hiçbir veri toplanmaz, internete gönderilmez.</string>
+    <style name="Theme.Direnc" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
