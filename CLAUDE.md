@@ -29,6 +29,13 @@ cihazda kalır, tüm kod kullanıcınındır.
 şeyin önüne gelir. "Vazgeçtim"de ekran tekrar kilitlenir. Geçtikten sonra ekran kapanana
 kadar serbest; sonraki kilit açılışında ritüel yeniden gelir (serbest süre/muafiyet yok).
 
+**"Çalışmam bitti" (sol üst):** Gözcü ritüel overlay'inin sol üst köşesinde sade bir buton.
+Basınca oturum kapanır, gözcü durur ve telefonun kendi ana ekranına düşülür (artık kilit
+açınca ritüel gelmez). Sol üst konumu BİLİNÇLİ sürtünmedir: tek elle kaçamak bakarken
+(çoğunluk sağlak) sol üste ulaşmak zordur, yani yanlışlıkla değil gerçekten bitince basılır.
+`RitualScreen`'de opsiyonel `onFinishStudy` callback'i ile gösterilir — yalnızca overlay
+gönderir; uygulama-içi ritüelde görünmez.
+
 ---
 
 ## 2. Önemli tasarım kararları / kısıtlar (DEĞİŞTİRMEDEN ÖNCE OKU)
@@ -64,7 +71,7 @@ JAVA_HOME=/opt/android-studio/jbr ./gradlew <görev>
 
 ### Sık kullanılan komutlar
 ```bash
-# Birim testleri (28 test)
+# Birim testleri (33 test)
 JAVA_HOME=/opt/android-studio/jbr ./gradlew :app:testDebugUnitTest
 
 # Derleme
@@ -111,11 +118,12 @@ app/src/main/java/com/abis/direnc/
   domain/
     MathProblem.kt          # MathProblemGenerator (saf, TDD)
     Stats.kt                # countOnDay/countThisWeek/streak (saf, TDD). Hafta=Pazartesi başlangıç
+    SessionStats.kt         # Oturum özetleri, çalışma süresi (toplam/gün/hafta), 7 gün dağılımı, formatDuration (saf, TDD)
   ui/
     theme/Theme.kt, Spacing.kt   # Krem tema, boşluk sabitleri
     home/                   # HomeViewModel (oturum + bugün/streak), HomeScreen
     ritual/                 # RitualViewModel (durum makinesi), RitualScreen — gözcü de bunu kullanır
-    stats/                  # StatsViewModel, StatsScreen (toplam/bugün/hafta/streak/giriş)
+    stats/                  # StatsViewModel, StatsScreen (direniş sayaçları + çalışma süresi + 7 gün grafiği + oturum listesi)
     settings/               # SettingsViewModel, SettingsScreen (metin ekle/düzenle/sil)
     onboarding/             # OnboardingScreen (3 izni açıklayıp ister)
   watcher/                  # GÖZCÜ
@@ -171,7 +179,8 @@ Ekran kapanınca → `passedThisUnlock=false`. Oturum bitince → `WatcherServic
 - ✅ **Plan 1 (çekirdek):** tema, veri, ritüel, takip, ayarlar (ekle/düzenle/sil) — tam.
 - ✅ **Plan 2 (gözcü):** servis, overlay, erişilebilirlik, onboarding, kilitleme — tam.
 - ✅ **Uygulama ikonu:** krem zeminde minimal halka (adaptive icon).
-- ✅ **28 birim testi** geçiyor, `assembleDebug` başarılı, internet izni yok.
+- ✅ **33 birim testi** geçiyor, `assembleDebug` başarılı, internet izni yok.
+- ✅ **Plan 3 (oturum geçmişi):** Takip ekranında çalışma süresi, 7 gün grafiği, oturum listesi — tam.
 - ✅ Telefona kuruldu (Galaxy S24 FE, Android 16).
 - ✅ **Cihazda gözcü doğrulandı (2026-06-14):** kullanıcı test etti, sorunsuz çalışıyor —
   kilit açılışında ritüel geliyor, "Vazgeçtim" ekranı kilitliyor. Samsung BAL'a takılmadı.
@@ -184,6 +193,7 @@ Ekran kapanınca → `passedThisUnlock=false`. Oturum bitince → `WatcherServic
 - **Tasarım:** `docs/superpowers/specs/2026-06-14-direnc-phone-friction-design.md`
 - **Plan 1:** `docs/superpowers/plans/2026-06-14-direnc-plan1-cekirdek-uygulama.md`
 - **Plan 2:** `docs/superpowers/plans/2026-06-14-direnc-plan2-gozcu.md`
+- **Plan 3:** `docs/superpowers/plans/2026-06-14-direnc-plan3-oturum-gecmisi.md`
 - Geliştirme yöntemi: brainstorm → spec → plan → TDD ile uygulama, her task'ta atomik commit.
 - Commit mesajları `Co-Authored-By: Claude Opus 4.8 (1M context)` ile bitiyor.
 

@@ -148,6 +148,9 @@ class MainActivity : ComponentActivity() {
     private fun repoAsStatsSource() = object : StatsSource {
         override fun resistanceTimestamps(): Flow<List<Long>> = repo.resistanceTimestamps()
         override fun entryTimestamps(): Flow<List<Long>> = repo.entryTimestamps()
+        override fun completedSessions(): Flow<List<Session>> = repo.completedSessions()
+        override fun resistanceSessionIds(): Flow<List<Long>> = repo.resistanceSessionIds()
+        override fun entrySessionIds(): Flow<List<Long>> = repo.entrySessionIds()
     }
 
     private fun repoAsSettingsSource() = object : SettingsSource {

@@ -11,6 +11,9 @@ class DirencRepository(
     fun resistanceTimestamps(): Flow<List<Long>> = eventDao.resistanceTimestamps()
     fun entryTimestamps(): Flow<List<Long>> = eventDao.entryTimestamps()
     fun motivationTexts(): Flow<List<MotivationText>> = motivationDao.all()
+    fun completedSessions(): Flow<List<Session>> = sessionDao.completedSessions()
+    fun resistanceSessionIds(): Flow<List<Long>> = eventDao.resistanceSessionIds()
+    fun entrySessionIds(): Flow<List<Long>> = eventDao.entrySessionIds()
 
     suspend fun startSession(now: Long) {
         if (sessionDao.activeSessionOnce() == null) {

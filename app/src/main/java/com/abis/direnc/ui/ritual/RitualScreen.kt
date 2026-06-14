@@ -29,12 +29,18 @@ import com.abis.direnc.ui.theme.Spacing
 
 /**
  * Ritüel akışı. result PASSED/GAVE_UP olunca ilgili callback tetiklenir.
+ *
+ * onFinishStudy null değilse, sol üst köşede sade bir "Çalışmam bitti" butonu gösterilir
+ * (yalnızca gözcü overlay'inde kullanılır). Sol üst, tek elle kaçamak bakarken zor
+ * ulaşılan bir nokta olduğundan bilinçli sürtünmedir: yanlışlıkla değil, gerçekten
+ * bitirince basılır → oturumu kapatır.
  */
 @Composable
 fun RitualScreen(
     viewModel: RitualViewModel,
     onPassed: () -> Unit,
     onGaveUp: () -> Unit,
+    onFinishStudy: (() -> Unit)? = null,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -52,6 +58,17 @@ fun RitualScreen(
             .padding(Spacing.xl),
         contentAlignment = Alignment.Center,
     ) {
+        if (onFinishStudy != null) {
+            TextButton(
+                onClick = onFinishStudy,
+                modifier = Modifier.align(Alignment.TopStart),
+            ) {
+                Text(
+                    "Çalışmam bitti",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+        }
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,

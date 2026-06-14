@@ -17,6 +17,9 @@ import com.abis.direnc.ui.ritual.RitualActions
 import com.abis.direnc.ui.ritual.RitualScreen
 import com.abis.direnc.ui.ritual.RitualViewModel
 import com.abis.direnc.ui.theme.DirencTheme
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * Kilit açılışında her şeyin önüne gelen ritüel ekranı. Plan 1'deki RitualScreen'i
@@ -56,6 +59,7 @@ class RitualOverlayActivity : ComponentActivity() {
                             GuardAccessibilityService.instance?.lockScreen()
                             finish()
                         },
+                        onFinishStudy = { finishStudy() },
                     )
                 }
             }
@@ -65,6 +69,25 @@ class RitualOverlayActivity : ComponentActivity() {
     // Geri tuşuyla kaçışı engelle (ritüel beklerken)
     @Suppress("MissingSuperCall", "OVERRIDE_DEPRECATION")
     override fun onBackPressed() { /* yut: geri ile çıkılamaz */ }
+
+    /**
+     * "Çalışmam bitti" (sol üst): oturumu kapat, gözcüyü durdur, telefonun ana ekranına git.
+     * Bilinçli olarak ulaşması zor bir konumda; gerçekten bitince basılır.
+     */
+    private fun finishStudy() {
+        WatcherState.ritualPending = false
+        WatcherState.sessionActive = false
+        WatcherState.passedThisUnlock = false
+        CoroutineScope(Dispatchers.IO).launch { repo.endActiveSession(now()) }
+        WatcherService.stop(this)
+        // Telefonun kendi ana ekranına düş
+        startActivity(
+            Intent(Intent.ACTION_MAIN)
+                .addCategory(Intent.CATEGORY_HOME)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        )
+        finish()
+    }
 
     private fun actions() = object : RitualActions {
         override suspend fun randomMotivationText() = repo.randomMotivationText()

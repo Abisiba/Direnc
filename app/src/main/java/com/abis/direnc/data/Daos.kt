@@ -17,6 +17,9 @@ interface SessionDao {
 
     @Query("SELECT * FROM sessions WHERE endedAt IS NULL ORDER BY startedAt DESC LIMIT 1")
     suspend fun activeSessionOnce(): Session?
+
+    @Query("SELECT * FROM sessions WHERE endedAt IS NOT NULL ORDER BY startedAt DESC")
+    fun completedSessions(): Flow<List<Session>>
 }
 
 @Dao
@@ -29,6 +32,12 @@ interface EventDao {
 
     @Query("SELECT timestamp FROM entry_events ORDER BY timestamp ASC")
     fun entryTimestamps(): Flow<List<Long>>
+
+    @Query("SELECT sessionId FROM resistance_events WHERE sessionId IS NOT NULL")
+    fun resistanceSessionIds(): Flow<List<Long>>
+
+    @Query("SELECT sessionId FROM entry_events WHERE sessionId IS NOT NULL")
+    fun entrySessionIds(): Flow<List<Long>>
 }
 
 @Dao
